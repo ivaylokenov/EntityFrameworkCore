@@ -4442,9 +4442,18 @@ LEFT JOIN [LevelTwo] AS [l2] ON [l].[Id] = [l2].[OneToMany_Required_Inverse2Id]
 ORDER BY [l].[Id], [l2].[Id]");
         }
 
-        private void AssertSql(params string[] expected)
+        public override async Task Null_conditional_is_not_applied_explicitly_for_optional_navigation(bool async)
         {
-            Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
+            await base.Null_conditional_is_not_applied_explicitly_for_optional_navigation(async);
+
+            AssertSql(
+                @"SELECT [l].[Id], [l].[Date], [l].[Name], [l].[OneToMany_Optional_Self_Inverse1Id], [l].[OneToMany_Required_Self_Inverse1Id], [l].[OneToOne_Optional_Self1Id]
+FROM [LevelOne] AS [l]
+LEFT JOIN [LevelTwo] AS [l0] ON [l].[Id] = [l0].[Level1_Optional_Id]
+WHERE [l0].[Id] IS NOT NULL AND ([l0].[Name] = N'L2 01')");
         }
+
+        private void AssertSql(params string[] expected)
+            => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
     }
 }
